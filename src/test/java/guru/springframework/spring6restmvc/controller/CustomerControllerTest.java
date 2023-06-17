@@ -27,12 +27,13 @@ public class CustomerControllerTest {
 
     @Test
     public void putCustomer() throws Exception{
-        String updatedName = "JT";
+       String updatedName = "JT";
        String allCustomers = mockMvc.perform(get("/api/v1/customer")).andReturn().getResponse().getContentAsString();
        assertFalse(allCustomers.contains(updatedName));
        Customer[] customers = objectMapper.readValue(allCustomers, Customer[].class);
        String id = customers[0].getId().toString();
-       Customer updatedCustomer = Customer.builder().name(updatedName).build();
+       Customer updatedCustomer = customers[0];
+       updatedCustomer.setName(updatedName);
        String custString = objectMapper.writeValueAsString(updatedCustomer);
        mockMvc.perform(put("/api/v1/customer/"+id)
                 .contentType(MediaType.APPLICATION_JSON)
