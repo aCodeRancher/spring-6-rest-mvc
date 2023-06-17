@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -23,17 +24,20 @@ public class CustomerControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
     @Test
     public void putCustomer() throws Exception{
+        String updatedName = "JT";
        String allCustomers = mockMvc.perform(get("/api/v1/customer")).andReturn().getResponse().getContentAsString();
+       assertFalse(allCustomers.contains(updatedName));
        Customer[] customers = objectMapper.readValue(allCustomers, Customer[].class);
        String id = customers[0].getId().toString();
-       Customer updatedCustomer = Customer.builder().name("JT").build();
+       Customer updatedCustomer = Customer.builder().name(updatedName).build();
        String custString = objectMapper.writeValueAsString(updatedCustomer);
        mockMvc.perform(put("/api/v1/customer/"+id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(custString)).andExpect(status().isNoContent());
       String  foundCustomer =  mockMvc.perform(get("/api/v1/customer/"+id)).andReturn().getResponse().getContentAsString();
-      assertTrue(foundCustomer.contains("JT"));
+      assertTrue(foundCustomer.contains(updatedName));
     }
 }
