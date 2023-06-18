@@ -1,7 +1,9 @@
 package guru.springframework.spring6restmvc.services;
 
+import guru.springframework.spring6restmvc.model.Beer;
 import guru.springframework.spring6restmvc.model.Customer;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -80,6 +82,16 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<Customer> getAllCustomers() {
         return new ArrayList<>(customerMap.values());
+    }
+
+    @Override
+    public void patchCustomerById(UUID uuid, Customer customer){
+        Customer existing = customerMap.get(uuid);
+
+        if (StringUtils.hasText(customer.getName())){
+            existing.setName(customer.getName());
+        }
+
     }
 }
 
