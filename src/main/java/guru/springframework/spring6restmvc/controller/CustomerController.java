@@ -50,4 +50,10 @@ public class CustomerController {
         return customerService.getCustomerById(id);
     }
 
+
+    @RequestMapping(value = "{customerId}", method = RequestMethod.DELETE)
+    public ResponseEntity deleteCustomerById(@PathVariable("customerId") UUID id){
+         customerService.deleteCustomerById(id);
+         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 }

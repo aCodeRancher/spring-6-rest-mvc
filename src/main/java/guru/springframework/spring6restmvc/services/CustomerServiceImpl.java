@@ -76,6 +76,11 @@ public class CustomerServiceImpl implements CustomerService {
     public List<Customer> getAllCustomers() {
         return new ArrayList<>(customerMap.values());
     }
+
+    public void deleteCustomerById(UUID id){
+         customerMap.remove(id);
+    }
+
 }
 
 
