@@ -6,17 +6,22 @@ import guru.springframework.spring6restmvc.services.CustomerService;
 import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CustomerController.class)
@@ -77,6 +82,27 @@ class CustomerControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name", is(customer.getName())));
 
+    }
+    @Captor
+    ArgumentCaptor<UUID> idCaptor;
+    @Captor
+    ArgumentCaptor<Customer> customerCaptor;
+    @Test
+    void updateCustomerById() throws Exception{
+        UUID id = UUID.randomUUID();
+        Customer testCustomer = Customer.builder().name("JT").id(id).build();
+        doNothing().when(customerService).updateCustomerById(any(UUID.class), any(Customer.class));
+        String inputCustomer = objectMapper.writeValueAsString(testCustomer);
+        mockMvc.perform(put("/api/v1/customer/"+ id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(inputCustomer))
+                        .andExpect(status().isNoContent());
+
+        verify(customerService,times(1))
+                .updateCustomerById(idCaptor.capture(), customerCaptor.capture()) ;
+        assertTrue(idCaptor.getValue().equals(id));
+        assertTrue(customerCaptor.getValue().equals(testCustomer));
+        verifyNoMoreInteractions(customerService);
     }
 }
 
