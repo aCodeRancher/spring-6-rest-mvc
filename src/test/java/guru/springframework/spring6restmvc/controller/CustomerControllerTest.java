@@ -6,6 +6,8 @@ import guru.springframework.spring6restmvc.services.CustomerService;
 import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,7 +19,7 @@ import java.util.UUID;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -34,6 +36,9 @@ class CustomerControllerTest {
     ObjectMapper objectMapper;
 
     CustomerServiceImpl customerServiceImpl;
+
+    @Captor
+    ArgumentCaptor<UUID> argumentCaptor  ;
 
     @BeforeEach
     void setUp() {
@@ -92,6 +97,15 @@ class CustomerControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name", is(customer.getName())));
 
+    }
+
+    @Test
+    void deleteCustomerById() throws Exception{
+        Customer customerToDel = Customer.builder().id(UUID.randomUUID()).build();
+        doNothing().when(customerService).deleteCustomerById(customerToDel.getId());
+        mockMvc.perform(delete("/api/v1/customer/"+ customerToDel.getId()))
+                .andExpect(status().isNoContent());
+        verify(customerService, times(1)).deleteCustomerById(argumentCaptor.capture());
     }
 }
 
