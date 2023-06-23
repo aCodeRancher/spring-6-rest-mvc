@@ -18,9 +18,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -46,6 +47,24 @@ class CustomerControllerTest {
     @Captor
     ArgumentCaptor<UUID> uuidArgumentCaptor;
 
+    @Captor
+    ArgumentCaptor<Customer> customerArgumentCaptor;
+    @Test
+    void testPatchCustomer() throws Exception{
+        UUID id = UUID.randomUUID();
+        Customer patchedCustomer = Customer.builder().id(id).name("New Name").build();
+        doNothing().when(customerService).patchCustomerById(id, patchedCustomer);
+        String patched = objectMapper.writeValueAsString(patchedCustomer);
+        mockMvc.perform(patch("/api/v1/customer/"+id)
+                     .content(patched)
+                     .contentType(MediaType.APPLICATION_JSON))
+                     .andExpect(status().isNoContent());
+        verify(customerService,times(1))
+                .patchCustomerById(uuidArgumentCaptor.capture(),customerArgumentCaptor.capture());
+        assertTrue(id.equals(uuidArgumentCaptor.getValue()));
+        assertTrue(patchedCustomer.equals(customerArgumentCaptor.getValue()));
+
+    }
     @Test
     void testDeleteCustomer() throws Exception {
         Customer customer = customerServiceImpl.getAllCustomers().get(0);
