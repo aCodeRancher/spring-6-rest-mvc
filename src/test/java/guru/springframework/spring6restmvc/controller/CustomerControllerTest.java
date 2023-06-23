@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -106,6 +107,8 @@ class CustomerControllerTest {
         mockMvc.perform(delete("/api/v1/customer/"+ customerToDel.getId()))
                 .andExpect(status().isNoContent());
         verify(customerService, times(1)).deleteCustomerById(argumentCaptor.capture());
+        assertTrue(customerToDel.getId().equals(argumentCaptor.getValue()));
+
     }
 }
 
