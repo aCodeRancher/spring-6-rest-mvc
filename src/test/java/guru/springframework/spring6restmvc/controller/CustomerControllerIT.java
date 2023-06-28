@@ -1,6 +1,7 @@
 package guru.springframework.spring6restmvc.controller;
 
 import guru.springframework.spring6restmvc.entities.Customer;
+import guru.springframework.spring6restmvc.mappers.CustomerMapper;
 import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,6 +30,8 @@ class CustomerControllerIT {
     @Autowired
     CustomerController customerController;
 
+    @Autowired
+    CustomerMapper customerMapper;
     @Rollback
     @Transactional
     @Test
@@ -74,6 +78,25 @@ class CustomerControllerIT {
        UUID savedID = UUID.fromString(location[4]);
        Customer customer = customerRepository.findById(savedID).get();
        assertTrue(customer.getName().equals("JT"));
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void updateCustomerByIdTest(){
+       String diffNameStr = "diff name";
+       Customer customerFound = customerRepository.findAll().get(0);
+       UUID id = customerFound.getId();
+       Customer  customerUpdate = Customer.builder().name(diffNameStr)
+                                   .createdDate(LocalDateTime.now())
+                                    .updateDate(LocalDateTime.now()).build();
+
+
+       ResponseEntity responseEntity = customerController.updateCustomerByID(id, customerMapper.customerToCustomerDto(customerUpdate));
+       assertTrue(responseEntity.getStatusCode().equals(HttpStatusCode.valueOf(204)));
+
+       Optional<Customer> customer1 = customerRepository.findById(id) ;
+        assertTrue(customer1.get().getName().equals(diffNameStr));
     }
 }
 
