@@ -32,6 +32,7 @@ class CustomerControllerIT {
 
     @Autowired
     CustomerMapper customerMapper;
+
     @Rollback
     @Transactional
     @Test
@@ -97,6 +98,14 @@ class CustomerControllerIT {
 
        Optional<Customer> customer1 = customerRepository.findById(id) ;
         assertTrue(customer1.get().getName().equals(diffNameStr));
+    }
+
+    @Test
+    void updateCustomerNotFound(){
+        Customer customer = Customer.builder().name("NotFound")
+                           .id(UUID.randomUUID()).build();
+       assertThrows(NotFoundException.class, ()-> customerController.updateCustomerByID(customer.getId(),
+                                                     customerMapper.customerToCustomerDto(customer)));
     }
 }
 

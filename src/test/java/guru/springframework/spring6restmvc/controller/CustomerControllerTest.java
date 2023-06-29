@@ -1,6 +1,7 @@
 package guru.springframework.spring6restmvc.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import guru.springframework.spring6restmvc.entities.Customer;
 import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.services.CustomerService;
 import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
@@ -87,19 +88,33 @@ class CustomerControllerTest {
 
     @Test
     void testUpdateCustomer() throws Exception {
-        CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
-
-        mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID, customer.getId())
-                .content(objectMapper.writeValueAsString(customer))
+        CustomerDTO customerDTO = customerServiceImpl.getAllCustomers().get(0);
+        given(customerService.updateCustomerById(any(), any())).willReturn(Optional.of(customerDTO));
+        mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID, customerDTO.getId())
+                .content(objectMapper.writeValueAsString(customerDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
         verify(customerService).updateCustomerById(uuidArgumentCaptor.capture(), any(CustomerDTO.class));
 
-        assertThat(customer.getId()).isEqualTo(uuidArgumentCaptor.getValue());
+        assertThat(customerDTO.getId()).isEqualTo(uuidArgumentCaptor.getValue());
     }
 
+
+    @Test
+    void testUpdateCustomerNotFound() throws Exception{
+        Customer testCustomer = Customer.builder().id(UUID.randomUUID()).name("NotFound").build();
+
+        given(customerService.updateCustomerById(any(), any())).willReturn(Optional.empty());
+        mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID, testCustomer.getId())
+                        .content(objectMapper.writeValueAsString(testCustomer))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(customerService).updateCustomerById(uuidArgumentCaptor.capture(), any(CustomerDTO.class));
+    }
     @Test
     void testCreateCustomer() throws Exception {
         CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
