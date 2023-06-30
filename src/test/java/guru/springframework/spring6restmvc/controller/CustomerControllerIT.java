@@ -107,6 +107,22 @@ class CustomerControllerIT {
        assertThrows(NotFoundException.class, ()-> customerController.updateCustomerByID(customer.getId(),
                                                      customerMapper.customerToCustomerDto(customer)));
     }
+
+    @Test
+    @Transactional
+    @Rollback
+    void deleteCustomerById(){
+        Customer customer = customerRepository.findAll().get(0);
+        ResponseEntity responseEntity = customerController.deleteCustomerById(customer.getId());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+        assertThat(customerRepository.findById(customer.getId()).isEmpty());
+    }
+
+    @Test
+    void deleteCustomerNotFound(){
+        Customer customer = Customer.builder().id(UUID.randomUUID()).build();
+        assertThrows(NotFoundException.class, ()-> customerController.deleteCustomerById(customer.getId()));
+     }
 }
 
 

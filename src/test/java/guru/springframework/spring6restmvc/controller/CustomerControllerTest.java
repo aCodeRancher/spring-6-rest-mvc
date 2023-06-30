@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -73,18 +75,7 @@ class CustomerControllerTest {
                 .isEqualTo(customerMap.get("name"));
     }
 
-    @Test
-    void testDeleteCustomer() throws Exception {
-        CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
 
-        mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID, customer.getId())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
-
-        verify(customerService).deleteCustomerById(uuidArgumentCaptor.capture());
-
-        assertThat(customer.getId()).isEqualTo(uuidArgumentCaptor.getValue());
-    }
 
     @Test
     void testUpdateCustomer() throws Exception {
@@ -162,6 +153,25 @@ class CustomerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name", is(customer.getName())));
+    }
+
+
+    @Test
+     void deleteCustomerById() throws Exception{
+        CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
+        given(customerService.deleteCustomerById(customer.getId())).willReturn(true);
+        mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID, customer.getId()))
+                .andExpect(status().isNoContent());
+        verify(customerService,times(1)).deleteCustomerById(customer.getId());
+    }
+    @Test
+    void deleteCustomerNotFound() throws Exception {
+        CustomerDTO customer = CustomerDTO.builder().id(UUID.randomUUID()).build();
+        given(customerService.deleteCustomerById(customer.getId())).willReturn(false);
+        mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID, customer.getId()))
+                .andExpect(status().isNotFound());
+        verify(customerService,times(1)).deleteCustomerById(customer.getId());
+
     }
 }
 
