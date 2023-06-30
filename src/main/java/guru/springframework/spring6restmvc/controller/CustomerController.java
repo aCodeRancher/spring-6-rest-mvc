@@ -27,7 +27,8 @@ public class CustomerController {
     public ResponseEntity patchCustomerById(@PathVariable("customerId") UUID customerId,
                                                 @RequestBody CustomerDTO customer){
 
-        customerService.patchCustomerById(customerId, customer);
+       if (customerService.patchCustomerById(customerId, customer).isEmpty())
+           throw new NotFoundException();
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }

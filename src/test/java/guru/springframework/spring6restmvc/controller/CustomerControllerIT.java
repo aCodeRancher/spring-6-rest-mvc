@@ -1,7 +1,9 @@
 package guru.springframework.spring6restmvc.controller;
 
+import guru.springframework.spring6restmvc.entities.Beer;
 import guru.springframework.spring6restmvc.entities.Customer;
 import guru.springframework.spring6restmvc.mappers.CustomerMapper;
+import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
 import org.junit.jupiter.api.Test;
@@ -123,6 +125,30 @@ class CustomerControllerIT {
         Customer customer = Customer.builder().id(UUID.randomUUID()).build();
         assertThrows(NotFoundException.class, ()-> customerController.deleteCustomerById(customer.getId()));
      }
+
+    @Test
+    void testPatchNotFound() {
+        assertThrows(NotFoundException.class, () -> {
+            customerController.updateCustomerByID(UUID.randomUUID(), CustomerDTO.builder().build());
+        });
+    }
+
+    @Rollback
+    @Transactional
+    @Test
+    void patchExistingBeer() {
+        Customer customer = customerRepository.findAll().get(0);
+        CustomerDTO customerDTO = customerMapper.customerToCustomerDto(customer);
+
+        final String customerName = "UPDATED";
+        customerDTO.setName(customerName);
+
+        ResponseEntity responseEntity = customerController.patchCustomerById(customer.getId(),customerDTO);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+
+        Customer updatedCustomer = customerRepository.findById(customer.getId()).get();
+        assertThat(updatedCustomer.getName()).isEqualTo(customerName);
+    }
 }
 
 

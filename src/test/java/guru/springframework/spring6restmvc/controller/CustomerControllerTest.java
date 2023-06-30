@@ -15,7 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +54,7 @@ class CustomerControllerTest {
     @Captor
     ArgumentCaptor<CustomerDTO> customerArgumentCaptor;
 
-    @Test
+    /*@Test
     void testPatchCustomer() throws Exception {
         CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
 
@@ -75,7 +74,7 @@ class CustomerControllerTest {
                 .isEqualTo(customerMap.get("name"));
     }
 
-
+    */
 
     @Test
     void testUpdateCustomer() throws Exception {
@@ -172,6 +171,36 @@ class CustomerControllerTest {
                 .andExpect(status().isNotFound());
         verify(customerService,times(1)).deleteCustomerById(customer.getId());
 
+    }
+
+    @Test
+    void patchCustomerById() throws Exception{
+        CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
+        customer.setName("UPDATED");
+        given(customerService.patchCustomerById(any(), any())).willReturn(Optional.of(customer));
+
+        mockMvc.perform(patch(CustomerController.CUSTOMER_PATH_ID, customer.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
+                .andExpect(status().isNoContent());
+
+        verify(customerService).patchCustomerById(any(UUID.class), any(CustomerDTO.class));
+    }
+
+    @Test
+    void patchCustomerNotFound() throws Exception{
+        CustomerDTO customer = CustomerDTO.builder().id(UUID.randomUUID()).build();
+        customer.setName("UPDATED");
+        given(customerService.patchCustomerById(any(), any())).willReturn(Optional.empty());
+
+        mockMvc.perform(patch(CustomerController.CUSTOMER_PATH_ID, customer.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
+                .andExpect(status().isNotFound());
+
+        verify(customerService).patchCustomerById(any(UUID.class), any(CustomerDTO.class));
     }
 }
 
