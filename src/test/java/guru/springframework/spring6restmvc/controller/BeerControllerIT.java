@@ -34,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-
 class BeerControllerIT {
     @Autowired
     BeerController beerController;
@@ -66,6 +65,13 @@ class BeerControllerIT {
                 .andExpect(jsonPath("$.size()", is(336)));
     }
 
+    @Test
+    void tesListBeersByStyle() throws Exception {
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                       .queryParam("beerStyle", BeerStyle.IPA.name()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(548)));
+    }
     @Test
     void tesListBeersByNameAndStyle() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
