@@ -3,6 +3,7 @@ package guru.springframework.spring6restmvc.services;
 import guru.springframework.spring6restmvc.entities.Beer;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
+import guru.springframework.spring6restmvc.model.BeerStyle;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -26,15 +27,24 @@ public class BeerServiceJPA implements BeerService {
     private final BeerMapper beerMapper;
 
     @Override
-    public List<BeerDTO> listBeers(String beerName) {
+    public List<BeerDTO> listBeers(String beerName, BeerStyle beerStyle) {
 
         List<Beer> beerList;
-
-        if(StringUtils.hasText(beerName)) {
+        String beerstyle  = (beerStyle  == null) ? null :   beerStyle.toString();
+        if(StringUtils.hasText(beerName) && !StringUtils.hasText(beerstyle) ) {
             beerList = listBeersByName(beerName);
-        } else {
-            beerList = beerRepository.findAll();
         }
+        else
+         if (!StringUtils.hasText(beerName) &&  StringUtils.hasText(beerstyle)){
+              beerList = listBeersByStyle(beerStyle);
+          }
+          else if ( StringUtils.hasText(beerName) &&  StringUtils.hasText(beerstyle)){
+                     beerList = listBeerByNameAndStyle(beerName,  beerStyle );
+         }
+          else
+           {
+                 beerList = beerRepository.findAll();
+           }
 
         return beerList.stream()
                 .map(beerMapper::beerToBeerDto)
@@ -45,6 +55,13 @@ public class BeerServiceJPA implements BeerService {
         return beerRepository.findAllByBeerNameIsLikeIgnoreCase("%" + beerName + "%");
     }
 
+    public List<Beer> listBeersByStyle(BeerStyle beerStyle){
+         return beerRepository.findAllByBeerStyle(beerStyle);
+    }
+
+    public List<Beer> listBeerByNameAndStyle(String beerName, BeerStyle beerStyle){
+        return beerRepository.findAllByBeerNameIsLikeIgnoreCaseAndBeerStyle(beerName, beerStyle);
+    }
     @Override
     public Optional<BeerDTO> getBeerById(UUID id) {
         return Optional.ofNullable(beerMapper.beerToBeerDto(beerRepository.findById(id)
