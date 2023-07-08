@@ -31,11 +31,11 @@ public class BeerServiceJPA implements BeerService {
 
         List<Beer> beerList;
         String beerstyle  = (beerStyle  == null) ? null :   beerStyle.toString();
-        if(StringUtils.hasText(beerName) && !StringUtils.hasText(beerstyle) ) {
+        if(StringUtils.hasText(beerName) && !StringUtils.hasText(beerstyle)) {
             beerList = listBeersByName(beerName);
         }
         else
-         if (!StringUtils.hasText(beerName) &&  StringUtils.hasText(beerstyle)){
+         if (!StringUtils.hasText(beerName) &&  StringUtils.hasText(beerstyle) ){
               beerList = listBeersByStyle(beerStyle);
           }
           else if ( StringUtils.hasText(beerName) &&  StringUtils.hasText(beerstyle)){
@@ -60,7 +60,7 @@ public class BeerServiceJPA implements BeerService {
     }
 
     public List<Beer> listBeerByNameAndStyle(String beerName, BeerStyle beerStyle){
-        return beerRepository.findAllByBeerNameIsLikeIgnoreCaseAndBeerStyle(beerName, beerStyle);
+        return beerRepository.findAllByBeerNameIsLikeIgnoreCaseAndBeerStyle("%"+beerName+"%", beerStyle);
     }
     @Override
     public Optional<BeerDTO> getBeerById(UUID id) {
