@@ -35,7 +35,26 @@ class CategoryRepositoryTest {
         Beer saveBeer = beerRepository.save(testBeer);
 
         System.out.println(saveBeer.getBeerName());
+        System.out.println(saveBeer.getCategories().contains(savedCat));
+    }
 
+    @Transactional
+    @Test
+    void testRemoveCategory() {
+        Category savedCat = categoryRepository.save(Category.builder()
+                .description("Ales")
+                .build());
+
+        testBeer.addCategory(savedCat);
+        Beer saveBeer = beerRepository.save(testBeer);
+
+        System.out.println(saveBeer.getBeerName());
+        System.out.println(saveBeer.getCategories().contains(savedCat));
+
+        Beer foundBeer = beerRepository.findById(saveBeer.getId()).get();
+        foundBeer.removeCategory(savedCat);
+        Beer saveBeer1 = beerRepository.save(foundBeer);
+        System.out.println(saveBeer1.getCategories().contains(savedCat));
     }
 }
 
