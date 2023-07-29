@@ -57,6 +57,7 @@ class BeerControllerIT {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+                .apply(springSecurity())
                 .build();
     }
 
