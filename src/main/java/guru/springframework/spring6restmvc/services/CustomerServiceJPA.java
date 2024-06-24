@@ -4,6 +4,7 @@ import guru.springframework.spring6restmvc.mappers.CustomerMapper;
 import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 /**
  * Created by jt, Spring Framework Guru.
  */
+
+@Slf4j
 @Service
 @Primary
 @RequiredArgsConstructor
@@ -26,8 +29,9 @@ public class CustomerServiceJPA implements CustomerService {
     private final CustomerMapper customerMapper;
 
     @Override
-    @Cacheable(cacheNames = "customerCache", key = "#id")
+    @Cacheable(cacheNames = "customerCache", key="#uuid")
     public Optional<CustomerDTO> getCustomerById(UUID uuid) {
+        log.info("Get customer by id {}", uuid.toString());
         return Optional.ofNullable(customerMapper
                 .customerToCustomerDto(customerRepository.findById(uuid).orElse(null)));
     }
