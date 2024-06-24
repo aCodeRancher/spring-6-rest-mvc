@@ -49,7 +49,9 @@ public class CustomerServiceJPA implements CustomerService {
 
     @Override
     public CustomerDTO saveNewCustomer(CustomerDTO customer) {
-        cacheManager.getCache("customerListCache").clear();
+        if (cacheManager.getCache("customerListCache")!=null) {
+              cacheManager.getCache("customerListCache").clear();
+        }
         return customerMapper.customerToCustomerDto(customerRepository
                 .save(customerMapper.customerDtoToCustomer(customer)));
     }
@@ -104,6 +106,8 @@ public class CustomerServiceJPA implements CustomerService {
 
     private void clearCache(UUID customerId) {
         cacheManager.getCache("customerCache").evictIfPresent(customerId);
-        cacheManager.getCache("customerListCache").clear();
+        if (cacheManager.getCache("customerListCache") !=null) {
+            cacheManager.getCache("customerListCache").clear();
+        }
     }
 }
