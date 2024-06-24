@@ -153,7 +153,7 @@ public class BeerServiceJPA implements BeerService {
     }
 
     private void clearCache(UUID beerId) {
-        cacheManager.getCache("beerCache").evict(beerId);
+        cacheManager.getCache("beerCache").evictIfPresent(beerId);
         cacheManager.getCache("beerListCache").clear();
     }
 
