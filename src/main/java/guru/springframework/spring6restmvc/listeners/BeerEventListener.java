@@ -1,11 +1,10 @@
 package guru.springframework.spring6restmvc.listeners;
 
-import guru.springframework.spring6restmvc.events.BeerCreatedEvent;
+import guru.springframework.spring6restmvc.events.*;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.repositories.BeerAuditRepository;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -16,17 +15,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class BeerCreatedListener {
+public class BeerEventListener {
 
     private final BeerMapper beerMapper;
     private final BeerAuditRepository beerAuditRepository;
 
     @Async
     @EventListener
-    public void listen(BeerCreatedEvent event) {
+    public void listen(BeerEvent event) {
 
         val beerAudit = beerMapper.beerToBeerAudit(event.getBeer());
-        beerAudit.setAuditEventType("BEER_CREATED");
+        switch (event) {
+            case BeerCreatedEvent evt -> beerAudit.setAuditEventType("BEER_CREATED");
+            case BeerUpdatedEvent evt ->  beerAudit.setAuditEventType("BEER_UPDATED");
+            case BeerPatchedEvent evt ->  beerAudit.setAuditEventType("BEER_PATCHED");
+            case BeerDeletedEvent evt ->  beerAudit.setAuditEventType("BEER_DELETED");
+            default -> throw new IllegalStateException("Unexpected value: " + event);
+        };
+
 
         if (event.getAuthentication() != null && event.getAuthentication().getName() != null) {
             beerAudit.setPrincipalName(event.getAuthentication().getName());

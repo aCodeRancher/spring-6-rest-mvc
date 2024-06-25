@@ -2,6 +2,9 @@ package guru.springframework.spring6restmvc.services;
 
 import guru.springframework.spring6restmvc.entities.Beer;
 import guru.springframework.spring6restmvc.events.BeerCreatedEvent;
+import guru.springframework.spring6restmvc.events.BeerDeletedEvent;
+import guru.springframework.spring6restmvc.events.BeerPatchedEvent;
+import guru.springframework.spring6restmvc.events.BeerUpdatedEvent;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerStyle;
@@ -151,6 +154,10 @@ public class BeerServiceJPA implements BeerService {
             atomicReference.set(Optional.empty());
         });
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        BeerDTO beerDTO = atomicReference.get().get();
+        Beer savedBeer =  beerMapper.beerDtoToBeer(beerDTO);
+        applicationEventPublisher.publishEvent(new BeerUpdatedEvent(savedBeer, auth));
         return atomicReference.get();
     }
 
@@ -158,11 +165,18 @@ public class BeerServiceJPA implements BeerService {
     @Override
     public Boolean deleteById(UUID beerId) {
         clearCache(beerId);
-
+        Beer deleteBeer=null;
         if (beerRepository.existsById(beerId)) {
+            deleteBeer= beerRepository.findById(beerId).get();
             beerRepository.deleteById(beerId);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            applicationEventPublisher.publishEvent(new BeerDeletedEvent(deleteBeer, auth));
             return true;
         }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        applicationEventPublisher.publishEvent(new BeerDeletedEvent(deleteBeer, auth));
         return false;
     }
 
@@ -203,7 +217,10 @@ public class BeerServiceJPA implements BeerService {
         }, () -> {
             atomicReference.set(Optional.empty());
         });
-
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        BeerDTO beerDTO = atomicReference.get().get();
+        Beer savedBeer =  beerMapper.beerDtoToBeer(beerDTO);
+        applicationEventPublisher.publishEvent(new BeerPatchedEvent(savedBeer, auth));
         return atomicReference.get();
     }
 }

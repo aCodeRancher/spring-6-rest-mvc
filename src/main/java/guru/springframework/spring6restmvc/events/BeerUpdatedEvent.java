@@ -1,17 +1,19 @@
 package guru.springframework.spring6restmvc.events;
 
+
 import guru.springframework.spring6restmvc.entities.Beer;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.Authentication;
 
-/**
- * Created by jt, Spring Framework Guru.
- */
 
-public class BeerCreatedEvent extends BeerEvent{
+@Getter
+@Setter
+public class BeerUpdatedEvent extends BeerEvent{
 
 
-   public BeerCreatedEvent(Beer beer, Authentication authentication) {
+    public BeerUpdatedEvent(Beer beer, Authentication authentication) {
         super(beer, authentication);
     }
 }
