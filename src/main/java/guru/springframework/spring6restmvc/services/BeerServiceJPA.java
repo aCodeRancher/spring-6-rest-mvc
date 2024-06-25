@@ -1,5 +1,6 @@
 package guru.springframework.spring6restmvc.services;
 
+import guru.springframework.spring6restmvc.controller.NotFoundException;
 import guru.springframework.spring6restmvc.entities.Beer;
 import guru.springframework.spring6restmvc.events.BeerCreatedEvent;
 import guru.springframework.spring6restmvc.events.BeerDeletedEvent;
@@ -155,7 +156,7 @@ public class BeerServiceJPA implements BeerService {
         });
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        BeerDTO beerDTO = atomicReference.get().get();
+        BeerDTO beerDTO = atomicReference.get().orElseThrow(NotFoundException::new);
         Beer savedBeer =  beerMapper.beerDtoToBeer(beerDTO);
         applicationEventPublisher.publishEvent(new BeerUpdatedEvent(savedBeer, auth));
         return atomicReference.get();
