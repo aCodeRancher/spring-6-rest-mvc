@@ -58,7 +58,7 @@ public class Beer {
     @NotNull
     private BigDecimal price;
 
-    @OneToMany(mappedBy = "beer")
+    @OneToMany(mappedBy = "beer", cascade = CascadeType.ALL)
     private Set<BeerOrderLine> beerOrderLines;
 
     @Builder.Default
