@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 //test //
+//test//
 public class Spring6RestMvcApplication {
 
     public static void main(String[] args) {
